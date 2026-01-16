@@ -20,6 +20,7 @@ import {
   Globe,
   ChevronDown,
   ChevronRight,
+  BarChart3,
 } from "lucide-react";
 
 interface MenuItem {
@@ -90,6 +91,7 @@ const menuItems: MenuItem[] = [
   { label: "Footer Settings", icon: FileCode, path: "/footer-settings" },
   { label: "Homepage Settings", icon: Home, path: "/homepage-settings" },
   { label: "Site Settings", icon: Globe, path: "/site-settings" },
+  { label: "ROAI Calculator", icon: BarChart3, path: "/roai" },
 ];
 
 interface AdminSidebarProps {
