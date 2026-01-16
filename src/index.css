@@ -2,95 +2,122 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Sidebar - Dark Navy Blue */
+    --sidebar-bg: 215 45% 20%;
+    --sidebar-text: 210 20% 70%;
+    --sidebar-text-active: 0 0% 100%;
+    --sidebar-hover: 215 45% 25%;
+    --sidebar-active: 215 50% 28%;
+    --sidebar-brand: 0 0% 100%;
+    
+    /* Main Background */
+    --background: 210 20% 96%;
+    --foreground: 215 25% 20%;
 
+    /* Cards and Surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 215 25% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 215 25% 20%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary - Teal/Cyan for CTA buttons */
+    --primary: 187 85% 43%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary */
+    --secondary: 210 20% 94%;
+    --secondary-foreground: 215 25% 30%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted */
+    --muted: 210 20% 94%;
+    --muted-foreground: 215 15% 50%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent */
+    --accent: 187 85% 95%;
+    --accent-foreground: 187 85% 30%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Borders and Inputs */
+    --border: 214 20% 88%;
+    --input: 214 20% 88%;
+    --ring: 187 85% 43%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Additional semantic tokens */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Header */
+    --header-bg: 0 0% 100%;
+    --header-border: 214 20% 90%;
 
-    --sidebar-primary: 240 5.9% 10%;
+    /* Section Headers */
+    --section-header: 215 25% 30%;
+    --section-border: 214 20% 90%;
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    /* Form Elements */
+    --input-bg: 0 0% 100%;
+    --input-border: 214 20% 85%;
+    --input-focus: 187 85% 43%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Badges */
+    --badge-draft: 38 92% 50%;
+    --badge-published: 142 76% 36%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --sidebar-bg: 220 30% 12%;
+    --sidebar-text: 210 20% 70%;
+    --sidebar-text-active: 0 0% 100%;
+    --sidebar-hover: 220 30% 16%;
+    --sidebar-active: 220 35% 20%;
+    
+    --background: 220 30% 8%;
+    --foreground: 210 20% 90%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 30% 12%;
+    --card-foreground: 210 20% 90%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 30% 12%;
+    --popover-foreground: 210 20% 90%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 187 85% 43%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 220 25% 18%;
+    --secondary-foreground: 210 20% 85%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 25% 18%;
+    --muted-foreground: 215 15% 60%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 187 85% 15%;
+    --accent-foreground: 187 85% 70%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 220 25% 20%;
+    --input: 220 25% 20%;
+    --ring: 187 85% 43%;
+
+    --header-bg: 220 30% 12%;
+    --header-border: 220 25% 18%;
+    
+    --input-bg: 220 30% 15%;
+    --input-border: 220 25% 25%;
   }
 }
 
@@ -100,6 +127,190 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  /* Admin Card Styles */
+  .admin-card {
+    @apply bg-card rounded-lg border border-border shadow-sm;
+  }
+
+  .admin-card-header {
+    @apply px-6 py-4 border-b border-border;
+  }
+
+  .admin-card-title {
+    @apply text-base font-semibold text-card-foreground;
+  }
+
+  .admin-card-body {
+    @apply p-6;
+  }
+
+  /* Form Styles */
+  .admin-input {
+    @apply w-full px-4 py-2.5 rounded-md border border-input bg-input-bg text-foreground 
+           placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 
+           focus:border-input-focus transition-all duration-200;
+  }
+
+  .admin-label {
+    @apply block text-sm font-medium text-foreground mb-2;
+  }
+
+  .admin-hint {
+    @apply text-xs text-muted-foreground mt-1.5;
+  }
+
+  /* Toggle Button Group */
+  .toggle-group {
+    @apply inline-flex rounded-md overflow-hidden border border-border;
+  }
+
+  .toggle-btn {
+    @apply px-4 py-2 text-sm font-medium bg-card text-muted-foreground 
+           transition-colors duration-200 hover:bg-muted;
+  }
+
+  .toggle-btn-active {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90;
+  }
+
+  /* Section Navigation Pills */
+  .section-pill {
+    @apply px-3 py-1.5 text-xs font-medium rounded-full bg-muted text-muted-foreground
+           hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer;
+  }
+
+  .section-pill-active {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  /* Progress Bar */
+  .progress-bar {
+    @apply h-2 rounded-full bg-muted overflow-hidden;
+  }
+
+  .progress-fill {
+    @apply h-full bg-primary transition-all duration-500 ease-out;
+  }
+
+  /* Character Counter */
+  .char-counter {
+    @apply text-xs font-medium;
+  }
+
+  .char-counter-good {
+    @apply text-success;
+  }
+
+  .char-counter-warning {
+    @apply text-warning;
+  }
+
+  .char-counter-bad {
+    @apply text-destructive;
+  }
+
+  /* Sidebar Scrollbar */
+  .sidebar-scroll::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar-thumb {
+    @apply bg-white/10 rounded-full;
+  }
+
+  /* Rich Text Editor Placeholder */
+  .rich-editor {
+    @apply min-h-[200px] border border-input rounded-md bg-card;
+  }
+
+  .rich-editor-toolbar {
+    @apply flex items-center gap-1 p-2 border-b border-input bg-muted/50;
+  }
+
+  .rich-editor-content {
+    @apply p-4 min-h-[150px] outline-none;
+  }
+
+  /* Image Upload Placeholder */
+  .image-upload {
+    @apply border-2 border-dashed border-border rounded-lg p-6 flex flex-col items-center 
+           justify-center gap-3 bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer;
+  }
+
+  /* Table Styles */
+  .admin-table {
+    @apply w-full border-collapse;
+  }
+
+  .admin-table th {
+    @apply px-4 py-3 text-left text-sm font-medium text-muted-foreground bg-muted/50 border-b border-border;
+  }
+
+  .admin-table td {
+    @apply px-4 py-3 text-sm border-b border-border;
+  }
+}
+
+@layer utilities {
+  .bg-sidebar {
+    background-color: hsl(var(--sidebar-bg));
+  }
+
+  .text-sidebar {
+    color: hsl(var(--sidebar-text));
+  }
+
+  .text-sidebar-active {
+    color: hsl(var(--sidebar-text-active));
+  }
+
+  .bg-sidebar-hover {
+    background-color: hsl(var(--sidebar-hover));
+  }
+
+  .bg-sidebar-active {
+    background-color: hsl(var(--sidebar-active));
+  }
+
+  .bg-header {
+    background-color: hsl(var(--header-bg));
+  }
+
+  .border-header {
+    border-color: hsl(var(--header-border));
+  }
+
+  .bg-input-bg {
+    background-color: hsl(var(--input-bg));
+  }
+
+  .border-input-focus {
+    border-color: hsl(var(--input-focus));
+  }
+
+  .text-success {
+    color: hsl(var(--success));
+  }
+
+  .bg-success {
+    background-color: hsl(var(--success));
+  }
+
+  .text-warning {
+    color: hsl(var(--warning));
+  }
+
+  .bg-warning {
+    background-color: hsl(var(--warning));
   }
 }
