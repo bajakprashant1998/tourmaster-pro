@@ -1,7 +1,7 @@
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Image, Grid, List, Upload, Trash2, Download, FolderOpen, MoreHorizontal, Eye } from "lucide-react";
+import { Plus, Search, Image, Grid, List, Upload, Trash2, Download, FolderOpen, MoreHorizontal, Eye, GripVertical } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -11,16 +11,43 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { cn } from "@/lib/utils";
 
-const images = [
-  { id: 1, name: "dubai-skyline.jpg", size: "2.4 MB", date: "2026-01-15", folder: "Dubai", url: "/placeholder.svg" },
-  { id: 2, name: "desert-safari.jpg", size: "1.8 MB", date: "2026-01-14", folder: "Tours", url: "/placeholder.svg" },
-  { id: 3, name: "burj-khalifa.jpg", size: "3.2 MB", date: "2026-01-13", folder: "Dubai", url: "/placeholder.svg" },
-  { id: 4, name: "abu-dhabi-mosque.jpg", size: "2.1 MB", date: "2026-01-12", folder: "Abu Dhabi", url: "/placeholder.svg" },
-  { id: 5, name: "palm-jumeirah.jpg", size: "2.8 MB", date: "2026-01-11", folder: "Dubai", url: "/placeholder.svg" },
-  { id: 6, name: "ferrari-world.jpg", size: "1.9 MB", date: "2026-01-10", folder: "Abu Dhabi", url: "/placeholder.svg" },
-  { id: 7, name: "dhow-cruise.jpg", size: "1.5 MB", date: "2026-01-09", folder: "Tours", url: "/placeholder.svg" },
-  { id: 8, name: "marina-yacht.jpg", size: "2.6 MB", date: "2026-01-08", folder: "Dubai", url: "/placeholder.svg" },
+interface GalleryImage {
+  id: string;
+  name: string;
+  size: string;
+  date: string;
+  folder: string;
+  url: string;
+}
+
+const initialImages: GalleryImage[] = [
+  { id: "1", name: "dubai-skyline.jpg", size: "2.4 MB", date: "2026-01-15", folder: "Dubai", url: "/placeholder.svg" },
+  { id: "2", name: "desert-safari.jpg", size: "1.8 MB", date: "2026-01-14", folder: "Tours", url: "/placeholder.svg" },
+  { id: "3", name: "burj-khalifa.jpg", size: "3.2 MB", date: "2026-01-13", folder: "Dubai", url: "/placeholder.svg" },
+  { id: "4", name: "abu-dhabi-mosque.jpg", size: "2.1 MB", date: "2026-01-12", folder: "Abu Dhabi", url: "/placeholder.svg" },
+  { id: "5", name: "palm-jumeirah.jpg", size: "2.8 MB", date: "2026-01-11", folder: "Dubai", url: "/placeholder.svg" },
+  { id: "6", name: "ferrari-world.jpg", size: "1.9 MB", date: "2026-01-10", folder: "Abu Dhabi", url: "/placeholder.svg" },
+  { id: "7", name: "dhow-cruise.jpg", size: "1.5 MB", date: "2026-01-09", folder: "Tours", url: "/placeholder.svg" },
+  { id: "8", name: "marina-yacht.jpg", size: "2.6 MB", date: "2026-01-08", folder: "Dubai", url: "/placeholder.svg" },
 ];
 
 const folders = [
@@ -31,11 +58,101 @@ const folders = [
   { name: "Banners", count: 12 },
 ];
 
+function SortableImageCard({
+  image,
+  isSelected,
+  onToggleSelect,
+}: {
+  image: GalleryImage;
+  isSelected: boolean;
+  onToggleSelect: () => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: image.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "admin-card overflow-hidden group relative",
+        isDragging && "opacity-50 shadow-xl z-50"
+      )}
+    >
+      <div className="absolute top-2 left-2 z-10 flex gap-1">
+        <Checkbox
+          checked={isSelected}
+          onCheckedChange={onToggleSelect}
+          className="bg-white/80"
+        />
+      </div>
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute top-2 right-2 z-10 w-6 h-6 bg-black/50 rounded flex items-center justify-center cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        <GripVertical className="w-4 h-4 text-white" />
+      </div>
+      <div className="aspect-square bg-muted relative overflow-hidden">
+        <img src={image.url} alt={image.name} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+          <Button size="icon" variant="secondary">
+            <Eye className="w-4 h-4" />
+          </Button>
+          <Button size="icon" variant="secondary">
+            <Download className="w-4 h-4" />
+          </Button>
+          <Button size="icon" variant="destructive">
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+      <div className="p-3">
+        <p className="text-sm font-medium truncate">{image.name}</p>
+        <p className="text-xs text-muted-foreground">{image.size}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function Gallery() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [selectedImages, setSelectedImages] = useState<number[]>([]);
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [images, setImages] = useState<GalleryImage[]>(initialImages);
 
-  const toggleSelect = (id: number) => {
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = images.findIndex((img) => img.id === active.id);
+      const newIndex = images.findIndex((img) => img.id === over.id);
+      setImages(arrayMove(images, oldIndex, newIndex));
+    }
+  };
+
+  const toggleSelect = (id: string) => {
     setSelectedImages(prev => 
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
@@ -162,38 +279,36 @@ export default function Gallery() {
               </div>
             </div>
 
+            {/* Info Card */}
+            <div className="admin-card p-3 border-l-4 border-primary">
+              <p className="text-sm text-muted-foreground">
+                <strong>Tip:</strong> Drag images to reorder them. Changes will be saved automatically.
+              </p>
+            </div>
+
             {/* Images Grid */}
-            <div className={viewMode === "grid" ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" : "space-y-2"}>
-              {images.map((image) => (
-                viewMode === "grid" ? (
-                  <div key={image.id} className="admin-card overflow-hidden group relative">
-                    <div className="absolute top-2 left-2 z-10">
-                      <Checkbox 
-                        checked={selectedImages.includes(image.id)}
-                        onCheckedChange={() => toggleSelect(image.id)}
-                        className="bg-white/80"
+            {viewMode === "grid" ? (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext items={images} strategy={rectSortingStrategy}>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {images.map((image) => (
+                      <SortableImageCard
+                        key={image.id}
+                        image={image}
+                        isSelected={selectedImages.includes(image.id)}
+                        onToggleSelect={() => toggleSelect(image.id)}
                       />
-                    </div>
-                    <div className="aspect-square bg-muted relative overflow-hidden">
-                      <img src={image.url} alt={image.name} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        <Button size="icon" variant="secondary">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button size="icon" variant="secondary">
-                          <Download className="w-4 h-4" />
-                        </Button>
-                        <Button size="icon" variant="destructive">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="p-3">
-                      <p className="text-sm font-medium truncate">{image.name}</p>
-                      <p className="text-xs text-muted-foreground">{image.size}</p>
-                    </div>
+                    ))}
                   </div>
-                ) : (
+                </SortableContext>
+              </DndContext>
+            ) : (
+              <div className="space-y-2">
+                {images.map((image) => (
                   <div key={image.id} className="admin-card p-3 flex items-center gap-4">
                     <Checkbox 
                       checked={selectedImages.includes(image.id)}
@@ -221,9 +336,9 @@ export default function Gallery() {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
-                )
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

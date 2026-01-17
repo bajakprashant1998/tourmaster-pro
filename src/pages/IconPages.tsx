@@ -1,13 +1,12 @@
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, FileImage, Edit, Trash2, Eye, MoreHorizontal, Globe, ExternalLink, GripVertical } from "lucide-react";
+import { Plus, Search, FileImage, Edit, Trash2, Eye, MoreHorizontal, Globe, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
@@ -18,19 +17,80 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useState } from "react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { SortableTableRow } from "@/components/ui/sortable";
 
-const iconPages = [
-  { id: 1, title: "Dubai Desert Safari", icon: "🏜️", url: "/tours/desert-safari", order: 1, visible: true },
-  { id: 2, title: "Abu Dhabi City Tour", icon: "🕌", url: "/tours/abu-dhabi", order: 2, visible: true },
-  { id: 3, title: "Burj Khalifa", icon: "🏙️", url: "/tours/burj-khalifa", order: 3, visible: true },
-  { id: 4, title: "Dhow Cruise", icon: "🚢", url: "/tours/dhow-cruise", order: 4, visible: true },
-  { id: 5, title: "Ferrari World", icon: "🏎️", url: "/tours/ferrari-world", order: 5, visible: false },
-  { id: 6, title: "Palm Jumeirah", icon: "🌴", url: "/tours/palm-jumeirah", order: 6, visible: true },
-  { id: 7, title: "Dubai Mall", icon: "🛍️", url: "/tours/dubai-mall", order: 7, visible: true },
-  { id: 8, title: "Miracle Garden", icon: "🌺", url: "/tours/miracle-garden", order: 8, visible: false },
+interface IconPage {
+  id: string;
+  title: string;
+  icon: string;
+  url: string;
+  order: number;
+  visible: boolean;
+}
+
+const initialIconPages: IconPage[] = [
+  { id: "1", title: "Dubai Desert Safari", icon: "🏜️", url: "/tours/desert-safari", order: 1, visible: true },
+  { id: "2", title: "Abu Dhabi City Tour", icon: "🕌", url: "/tours/abu-dhabi", order: 2, visible: true },
+  { id: "3", title: "Burj Khalifa", icon: "🏙️", url: "/tours/burj-khalifa", order: 3, visible: true },
+  { id: "4", title: "Dhow Cruise", icon: "🚢", url: "/tours/dhow-cruise", order: 4, visible: true },
+  { id: "5", title: "Ferrari World", icon: "🏎️", url: "/tours/ferrari-world", order: 5, visible: false },
+  { id: "6", title: "Palm Jumeirah", icon: "🌴", url: "/tours/palm-jumeirah", order: 6, visible: true },
+  { id: "7", title: "Dubai Mall", icon: "🛍️", url: "/tours/dubai-mall", order: 7, visible: true },
+  { id: "8", title: "Miracle Garden", icon: "🌺", url: "/tours/miracle-garden", order: 8, visible: false },
 ];
 
 export default function IconPages() {
+  const [iconPages, setIconPages] = useState<IconPage[]>(initialIconPages);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = iconPages.findIndex((page) => page.id === active.id);
+      const newIndex = iconPages.findIndex((page) => page.id === over.id);
+      const reordered = arrayMove(iconPages, oldIndex, newIndex).map((page, index) => ({
+        ...page,
+        order: index + 1,
+      }));
+      setIconPages(reordered);
+    }
+  };
+
+  const toggleVisibility = (id: string) => {
+    setIconPages((pages) =>
+      pages.map((page) =>
+        page.id === id ? { ...page, visible: !page.visible } : page
+      )
+    );
+  };
+
   return (
     <AdminLayout title="Icon Pages" breadcrumb={["Dashboard", "Icon Pages"]}>
       <div className="space-y-6">
@@ -43,7 +103,7 @@ export default function IconPages() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Icon Pages</p>
-                <p className="text-2xl font-bold">24</p>
+                <p className="text-2xl font-bold">{iconPages.length}</p>
               </div>
             </div>
           </div>
@@ -54,7 +114,7 @@ export default function IconPages() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Visible</p>
-                <p className="text-2xl font-bold">18</p>
+                <p className="text-2xl font-bold">{iconPages.filter((p) => p.visible).length}</p>
               </div>
             </div>
           </div>
@@ -74,7 +134,7 @@ export default function IconPages() {
         {/* Info Card */}
         <div className="admin-card p-4 border-l-4 border-primary">
           <p className="text-sm text-muted-foreground">
-            <strong>Tip:</strong> Icon pages are displayed on the homepage as quick navigation links. Drag to reorder, toggle visibility, and customize icons and URLs.
+            <strong>Tip:</strong> Icon pages are displayed on the homepage as quick navigation links. Drag rows to reorder, toggle visibility, and customize icons and URLs.
           </p>
         </div>
 
@@ -94,62 +154,71 @@ export default function IconPages() {
 
         {/* Table */}
         <div className="admin-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12"></TableHead>
-                <TableHead className="w-16">Order</TableHead>
-                <TableHead className="w-16">Icon</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>URL</TableHead>
-                <TableHead className="w-24">Visible</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {iconPages.map((page) => (
-                <TableRow key={page.id}>
-                  <TableCell>
-                    <Button variant="ghost" size="icon" className="cursor-grab">
-                      <GripVertical className="w-4 h-4 text-muted-foreground" />
-                    </Button>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{page.order}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-2xl">{page.icon}</span>
-                  </TableCell>
-                  <TableCell className="font-medium">{page.title}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <code className="px-2 py-1 bg-muted rounded">{page.url}</code>
-                      <Button variant="ghost" size="icon" className="h-7 w-7">
-                        <ExternalLink className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Switch checked={page.visible} />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem><Eye className="w-4 h-4 mr-2" /> Preview</DropdownMenuItem>
-                        <DropdownMenuItem><Edit className="w-4 h-4 mr-2" /> Edit</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive"><Trash2 className="w-4 h-4 mr-2" /> Delete</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={iconPages}
+              strategy={verticalListSortingStrategy}
+            >
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-12"></TableHead>
+                    <TableHead className="w-16">Order</TableHead>
+                    <TableHead className="w-16">Icon</TableHead>
+                    <TableHead>Title</TableHead>
+                    <TableHead>URL</TableHead>
+                    <TableHead className="w-24">Visible</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {iconPages.map((page) => (
+                    <SortableTableRow key={page.id} id={page.id}>
+                      <td className="py-3 px-4">
+                        <Badge variant="outline">{page.order}</Badge>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="text-2xl">{page.icon}</span>
+                      </td>
+                      <td className="py-3 px-4 font-medium">{page.title}</td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <code className="px-2 py-1 bg-muted rounded">{page.url}</code>
+                          <Button variant="ghost" size="icon" className="h-7 w-7">
+                            <ExternalLink className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <Switch
+                          checked={page.visible}
+                          onCheckedChange={() => toggleVisibility(page.id)}
+                        />
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem><Eye className="w-4 h-4 mr-2" /> Preview</DropdownMenuItem>
+                            <DropdownMenuItem><Edit className="w-4 h-4 mr-2" /> Edit</DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive"><Trash2 className="w-4 h-4 mr-2" /> Delete</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </td>
+                    </SortableTableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </SortableContext>
+          </DndContext>
         </div>
       </div>
     </AdminLayout>

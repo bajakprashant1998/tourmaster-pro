@@ -75,7 +75,11 @@ export default function EditTour() {
   });
 
   const [gallery, setGallery] = useState({
-    images: [],
+    images: [
+      { id: "1", url: "/placeholder.svg" },
+      { id: "2", url: "/placeholder.svg" },
+      { id: "3", url: "/placeholder.svg" },
+    ],
     enableFAQs: false,
   });
 
