@@ -21,6 +21,7 @@ import {
   ChevronDown,
   ChevronRight,
   BarChart3,
+  CalendarDays,
 } from "lucide-react";
 
 interface MenuItem {
@@ -32,6 +33,7 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/" },
+  { label: "Bookings", icon: CalendarDays, path: "/bookings" },
   { label: "Locations", icon: MapPin, path: "/locations" },
   { label: "Hotels", icon: Hotel, path: "/hotels" },
   {

@@ -22,6 +22,7 @@ import FooterSettings from "./pages/FooterSettings";
 import HomepageSettings from "./pages/HomepageSettings";
 import SiteSettings from "./pages/SiteSettings";
 import ROAI from "./pages/ROAI";
+import Bookings from "./pages/Bookings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/bookings" element={<Bookings />} />
           <Route path="/locations" element={<Locations />} />
           <Route path="/hotels" element={<Hotels />} />
           <Route path="/holidays" element={<Holidays />} />
