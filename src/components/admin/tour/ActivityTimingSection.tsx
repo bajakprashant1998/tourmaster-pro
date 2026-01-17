@@ -1,7 +1,22 @@
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { SortableTableRow } from "@/components/ui/sortable";
 
 interface TimingItem {
   id: string;
@@ -18,6 +33,30 @@ interface ActivityTimingSectionProps {
 }
 
 export function ActivityTimingSection({ data, onChange }: ActivityTimingSectionProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = data.items.findIndex((item) => item.id === active.id);
+      const newIndex = data.items.findIndex((item) => item.id === over.id);
+      onChange({
+        ...data,
+        items: arrayMove(data.items, oldIndex, newIndex),
+      });
+    }
+  };
+
   const addItem = () => {
     const newItem: TimingItem = {
       id: Date.now().toString(),
@@ -63,52 +102,67 @@ export function ActivityTimingSection({ data, onChange }: ActivityTimingSectionP
         </div>
 
         {/* Timing Table */}
+        <p className="text-xs text-muted-foreground">
+          Drag rows to reorder timing items
+        </p>
         <div className="border border-border rounded-lg overflow-hidden">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th className="w-1/3">Left Heading</th>
-                <th>Right Description</th>
-                <th className="w-12"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.items.map((item) => (
-                <tr key={item.id}>
-                  <td>
-                    <Input
-                      value={item.leftHeading}
-                      onChange={(e) =>
-                        updateItem(item.id, "leftHeading", e.target.value)
-                      }
-                      placeholder="Heading"
-                      className="admin-input"
-                    />
-                  </td>
-                  <td>
-                    <Input
-                      value={item.rightDescription}
-                      onChange={(e) =>
-                        updateItem(item.id, "rightDescription", e.target.value)
-                      }
-                      placeholder="Description"
-                      className="admin-input"
-                    />
-                  </td>
-                  <td>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeItem(item.id)}
-                      className="text-muted-foreground hover:text-destructive"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={data.items}
+              strategy={verticalListSortingStrategy}
+            >
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th className="w-8"></th>
+                    <th className="w-1/3">Left Heading</th>
+                    <th>Right Description</th>
+                    <th className="w-12"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.items.map((item) => (
+                    <SortableTableRow key={item.id} id={item.id}>
+                      <td>
+                        <Input
+                          value={item.leftHeading}
+                          onChange={(e) =>
+                            updateItem(item.id, "leftHeading", e.target.value)
+                          }
+                          placeholder="Heading"
+                          className="admin-input"
+                        />
+                      </td>
+                      <td>
+                        <Input
+                          value={item.rightDescription}
+                          onChange={(e) =>
+                            updateItem(item.id, "rightDescription", e.target.value)
+                          }
+                          placeholder="Description"
+                          className="admin-input"
+                        />
+                      </td>
+                      <td>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeItem(item.id)}
+                          className="text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </td>
+                    </SortableTableRow>
+                  ))}
+                </tbody>
+              </table>
+            </SortableContext>
+          </DndContext>
         </div>
 
         <div className="flex justify-end">

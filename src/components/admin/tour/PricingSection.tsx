@@ -1,9 +1,24 @@
-import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, GripVertical } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { SortableTableRow } from "@/components/ui/sortable";
 
 interface PricingItem {
   id: string;
@@ -25,6 +40,30 @@ interface PricingSectionProps {
 }
 
 export function PricingSection({ data, onChange }: PricingSectionProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = data.pricingItems.findIndex((item) => item.id === active.id);
+      const newIndex = data.pricingItems.findIndex((item) => item.id === over.id);
+      onChange({
+        ...data,
+        pricingItems: arrayMove(data.pricingItems, oldIndex, newIndex),
+      });
+    }
+  };
+
   const addPricingItem = () => {
     const newItem: PricingItem = {
       id: Date.now().toString(),
@@ -91,61 +130,72 @@ export function PricingSection({ data, onChange }: PricingSectionProps) {
 
         {/* Dynamic Pricing Table */}
         <div>
+          <p className="text-xs text-muted-foreground mb-2">
+            Drag rows to reorder pricing items
+          </p>
           <div className="border border-border rounded-lg overflow-hidden">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th className="w-8"></th>
-                  <th>Title & Price</th>
-                  <th>Transfer Option</th>
-                  <th>Quantity</th>
-                  <th className="w-12"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.pricingItems.map((item) => (
-                  <tr key={item.id}>
-                    <td className="text-center">
-                      <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab mx-auto" />
-                    </td>
-                    <td>
-                      <Input
-                        value={item.title}
-                        onChange={(e) => updatePricingItem(item.id, "title", e.target.value)}
-                        placeholder="Title & Price"
-                        className="admin-input"
-                      />
-                    </td>
-                    <td>
-                      <Input
-                        value={item.transferOption}
-                        onChange={(e) => updatePricingItem(item.id, "transferOption", e.target.value)}
-                        placeholder="Transfer Option"
-                        className="admin-input"
-                      />
-                    </td>
-                    <td>
-                      <Input
-                        value={item.quantity}
-                        onChange={(e) => updatePricingItem(item.id, "quantity", e.target.value)}
-                        placeholder="Qty"
-                        className="admin-input"
-                      />
-                    </td>
-                    <td>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removePricingItem(item.id)}
-                        className="text-muted-foreground hover:text-destructive"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={data.pricingItems}
+                strategy={verticalListSortingStrategy}
+              >
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th className="w-8"></th>
+                      <th>Title & Price</th>
+                      <th>Transfer Option</th>
+                      <th>Quantity</th>
+                      <th className="w-12"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.pricingItems.map((item) => (
+                      <SortableTableRow key={item.id} id={item.id}>
+                        <td>
+                          <Input
+                            value={item.title}
+                            onChange={(e) => updatePricingItem(item.id, "title", e.target.value)}
+                            placeholder="Title & Price"
+                            className="admin-input"
+                          />
+                        </td>
+                        <td>
+                          <Input
+                            value={item.transferOption}
+                            onChange={(e) => updatePricingItem(item.id, "transferOption", e.target.value)}
+                            placeholder="Transfer Option"
+                            className="admin-input"
+                          />
+                        </td>
+                        <td>
+                          <Input
+                            value={item.quantity}
+                            onChange={(e) => updatePricingItem(item.id, "quantity", e.target.value)}
+                            placeholder="Qty"
+                            className="admin-input"
+                          />
+                        </td>
+                        <td>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removePricingItem(item.id)}
+                            className="text-muted-foreground hover:text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </td>
+                      </SortableTableRow>
+                    ))}
+                  </tbody>
+                </table>
+              </SortableContext>
+            </DndContext>
           </div>
           <div className="flex justify-end mt-4">
             <Button onClick={addPricingItem} className="bg-primary hover:bg-primary/90">

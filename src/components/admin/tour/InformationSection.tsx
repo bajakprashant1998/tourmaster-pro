@@ -1,7 +1,25 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, GripVertical } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { cn } from "@/lib/utils";
 
 interface InformationItem {
   id: string;
@@ -33,7 +51,107 @@ const defaultBlockTitles = [
   { key: "child", label: "Child Policy", default: "Default: Child Policy" },
 ];
 
+function SortableInfoItem({
+  item,
+  blockId,
+  onUpdate,
+  onRemove,
+  placeholder,
+  canRemove,
+}: {
+  item: InformationItem;
+  blockId: string;
+  onUpdate: (value: string) => void;
+  onRemove: () => void;
+  placeholder: string;
+  canRemove: boolean;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "flex gap-2 items-center",
+        isDragging && "opacity-50 bg-muted rounded z-50"
+      )}
+    >
+      <button
+        type="button"
+        className="touch-none cursor-grab active:cursor-grabbing p-1 hover:bg-muted rounded"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="w-4 h-4 text-muted-foreground" />
+      </button>
+      <div className="flex-1">
+        <Input
+          value={item.value}
+          onChange={(e) => onUpdate(e.target.value)}
+          placeholder={placeholder}
+          className="admin-input"
+        />
+      </div>
+      {canRemove && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onRemove}
+          className="text-muted-foreground hover:text-destructive"
+        >
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      )}
+    </div>
+  );
+}
+
 export function InformationSection({ data, onChange }: InformationSectionProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (blockId: string) => (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const block = data.blocks.find((b) => b.id === blockId);
+      if (!block) return;
+
+      const oldIndex = block.items.findIndex((item) => item.id === active.id);
+      const newIndex = block.items.findIndex((item) => item.id === over.id);
+
+      onChange({
+        ...data,
+        blocks: data.blocks.map((b) =>
+          b.id === blockId
+            ? { ...b, items: arrayMove(b.items, oldIndex, newIndex) }
+            : b
+        ),
+      });
+    }
+  };
+
   const addItem = (blockId: string) => {
     const newItem: InformationItem = {
       id: Date.now().toString(),
@@ -107,30 +225,34 @@ export function InformationSection({ data, onChange }: InformationSectionProps) 
         {/* Information Blocks */}
         {data.blocks.map((block) => (
           <div key={block.id} className="space-y-3">
-            <h3 className="text-sm font-medium text-foreground">{block.title}</h3>
-            {block.items.map((item, index) => (
-              <div key={item.id} className="flex gap-2">
-                <div className="flex-1">
-                  {index === 0 && <Label className="admin-label">Title</Label>}
-                  <Input
-                    value={item.value}
-                    onChange={(e) => updateItem(block.id, item.id, e.target.value)}
-                    placeholder={defaultBlockTitles.find(b => b.label === block.title)?.default || ""}
-                    className="admin-input"
-                  />
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium text-foreground">{block.title}</h3>
+              <span className="text-xs text-muted-foreground">Drag to reorder</span>
+            </div>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd(block.id)}
+            >
+              <SortableContext
+                items={block.items}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-2">
+                  {block.items.map((item) => (
+                    <SortableInfoItem
+                      key={item.id}
+                      item={item}
+                      blockId={block.id}
+                      onUpdate={(value) => updateItem(block.id, item.id, value)}
+                      onRemove={() => removeItem(block.id, item.id)}
+                      placeholder={defaultBlockTitles.find(b => b.label === block.title)?.default || ""}
+                      canRemove={block.items.length > 1}
+                    />
+                  ))}
                 </div>
-                {block.items.length > 1 && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeItem(block.id, item.id)}
-                    className="mt-7 text-muted-foreground hover:text-destructive"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
+              </SortableContext>
+            </DndContext>
             <div className="flex justify-end">
               <Button
                 onClick={() => addItem(block.id)}
