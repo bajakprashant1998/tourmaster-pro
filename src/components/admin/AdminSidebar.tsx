@@ -22,6 +22,7 @@ import {
   ChevronRight,
   BarChart3,
   CalendarDays,
+  Mail,
 } from "lucide-react";
 
 interface MenuItem {
@@ -93,6 +94,7 @@ const menuItems: MenuItem[] = [
   { label: "Footer Settings", icon: FileCode, path: "/footer-settings" },
   { label: "Homepage Settings", icon: Home, path: "/homepage-settings" },
   { label: "Site Settings", icon: Globe, path: "/site-settings" },
+  { label: "Email Templates", icon: Mail, path: "/email-templates" },
   { label: "ROAI Calculator", icon: BarChart3, path: "/roai" },
 ];
 
