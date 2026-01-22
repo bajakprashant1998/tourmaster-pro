@@ -23,6 +23,7 @@ import HomepageSettings from "./pages/HomepageSettings";
 import SiteSettings from "./pages/SiteSettings";
 import ROAI from "./pages/ROAI";
 import Bookings from "./pages/Bookings";
+import EmailTemplates from "./pages/EmailTemplates";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -59,6 +60,7 @@ const App = () => (
           <Route path="/footer-settings" element={<FooterSettings />} />
           <Route path="/homepage-settings" element={<HomepageSettings />} />
           <Route path="/site-settings" element={<SiteSettings />} />
+          <Route path="/email-templates" element={<EmailTemplates />} />
           <Route path="/roai" element={<ROAI />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
