@@ -47,6 +47,7 @@ import {
   Mail,
   Phone,
 } from "lucide-react";
+import { BookingDetailsDrawer } from "@/components/admin/BookingDetailsDrawer";
 
 interface Booking {
   id: string;
@@ -193,6 +194,13 @@ const Bookings = () => {
   const [paymentFilter, setPaymentFilter] = useState<string>("all");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [activeTab, setActiveTab] = useState("table");
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const handleViewBooking = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setDrawerOpen(true);
+  };
 
   const filteredBookings = mockBookings.filter((booking) => {
     const matchesSearch =
@@ -484,7 +492,7 @@ const Bookings = () => {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleViewBooking(booking)}>
                                 <Eye className="w-4 h-4 mr-2" />
                                 View Details
                               </DropdownMenuItem>
@@ -593,7 +601,7 @@ const Bookings = () => {
                               <p className="text-sm text-muted-foreground">{booking.customerPhone}</p>
                             </div>
                             <div className="flex gap-2">
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => handleViewBooking(booking)}>
                                 <Eye className="w-4 h-4 mr-1" />
                                 View
                               </Button>
@@ -620,6 +628,13 @@ const Bookings = () => {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Booking Details Drawer */}
+        <BookingDetailsDrawer
+          booking={selectedBooking}
+          open={drawerOpen}
+          onOpenChange={setDrawerOpen}
+        />
       </div>
     </AdminLayout>
   );
