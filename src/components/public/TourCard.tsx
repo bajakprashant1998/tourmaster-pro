@@ -1,8 +1,10 @@
+import { Link } from "react-router-dom";
 import { MapPin, Clock, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 interface TourCardProps {
+  id?: string;
   image: string;
   title: string;
   location: string;
@@ -15,6 +17,7 @@ interface TourCardProps {
 }
 
 const TourCard = ({
+  id,
   image,
   title,
   location,
@@ -25,8 +28,10 @@ const TourCard = ({
   reviewCount,
   badge,
 }: TourCardProps) => {
+  const tourLink = id ? `/tour/${id}` : "#";
+  
   return (
-    <div className="group bg-card rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1">
+    <Link to={tourLink} className="block group bg-card rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1">
       {/* Image */}
       <div className="relative h-48 overflow-hidden">
         <img
@@ -82,7 +87,7 @@ const TourCard = ({
           </Button>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 
