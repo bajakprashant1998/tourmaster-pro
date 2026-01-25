@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
-import { ChevronRight, Grid3X3, List } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { ChevronRight, Grid3X3, List, Loader2 } from "lucide-react";
 import Header from "@/components/public/Header";
 import Footer from "@/components/public/Footer";
 import TourCard from "@/components/public/TourCard";
@@ -19,177 +19,66 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useTours, useCategories, useLocations } from "@/hooks/useTours";
 
-// Mock data - in production this would come from an API
-const allTours = [
-  {
-    id: "desert-safari-premium",
-    image: "https://images.unsplash.com/photo-1451337516015-6b6e9a44a8a3?w=600&q=80",
-    title: "Premium Desert Safari with BBQ Dinner & Entertainment",
-    location: "Dubai",
-    duration: "6-7 Hours",
-    price: 149,
-    originalPrice: 199,
-    rating: 4.8,
-    reviewCount: 2453,
-    badge: "Bestseller",
-    category: "Desert Safari",
-  },
-  {
-    id: "dhow-cruise-marina",
-    image: "https://images.unsplash.com/photo-1582672060674-bc2bd808a8b5?w=600&q=80",
-    title: "Dhow Cruise Dubai Marina with Dinner",
-    location: "Dubai",
-    duration: "2-3 Hours",
-    price: 120,
-    rating: 4.8,
-    reviewCount: 324,
-    category: "Water Activities",
-  },
-  {
-    id: "museum-future",
-    image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&q=80",
-    title: "Museum of The Future Tickets",
-    location: "Dubai",
-    duration: "2-3 Hours",
-    price: 169,
-    rating: 4.9,
-    reviewCount: 512,
-    badge: "Popular",
-    category: "Attractions",
-  },
-  {
-    id: "burj-khalifa-top",
-    image: "https://images.unsplash.com/photo-1580674684081-7617fbf3d745?w=600&q=80",
-    title: "Burj Khalifa At The Top Experience",
-    location: "Dubai",
-    duration: "2-3 Hours",
-    price: 149,
-    rating: 4.7,
-    reviewCount: 3421,
-    category: "Attractions",
-  },
-  {
-    id: "abu-dhabi-city",
-    image: "https://images.unsplash.com/photo-1609866138210-84bb689f3c61?w=600&q=80",
-    title: "Abu Dhabi City Tour from Dubai",
-    location: "Abu Dhabi",
-    duration: "Full Day",
-    price: 149,
-    rating: 4.8,
-    reviewCount: 445,
-    category: "City Tours",
-  },
-  {
-    id: "ferrari-world",
-    image: "https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?w=600&q=80",
-    title: "Ferrari World Abu Dhabi Tickets",
-    location: "Abu Dhabi",
-    duration: "Full Day",
-    price: 295,
-    rating: 4.9,
-    reviewCount: 678,
-    badge: "Popular",
-    category: "Theme Parks",
-  },
-  {
-    id: "warner-bros",
-    image: "https://images.unsplash.com/photo-1512632578888-169bbbc64f33?w=600&q=80",
-    title: "Warner Bros World Abu Dhabi",
-    location: "Abu Dhabi",
-    duration: "Full Day",
-    price: 315,
-    rating: 4.8,
-    reviewCount: 392,
-    category: "Theme Parks",
-  },
-  {
-    id: "yas-waterworld",
-    image: "https://images.unsplash.com/photo-1548017544-09b1e1ad57e5?w=600&q=80",
-    title: "Yas Waterworld Abu Dhabi",
-    location: "Abu Dhabi",
-    duration: "Full Day",
-    price: 265,
-    originalPrice: 310,
-    rating: 4.7,
-    reviewCount: 267,
-    badge: "15% Off",
-    category: "Water Activities",
-  },
-  {
-    id: "morning-safari",
-    image: "https://images.unsplash.com/photo-1549144511-f099e773c147?w=600&q=80",
-    title: "Morning Desert Safari with Quad Biking",
-    location: "Dubai",
-    duration: "4-5 Hours",
-    price: 199,
-    originalPrice: 249,
-    rating: 4.7,
-    reviewCount: 1234,
-    category: "Desert Safari",
-  },
-  {
-    id: "miracle-garden",
-    image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=600&q=80",
-    title: "Dubai Miracle Garden Tickets",
-    location: "Dubai",
-    duration: "2-3 Hours",
-    price: 65,
-    rating: 4.6,
-    reviewCount: 892,
-    category: "Attractions",
-  },
-  {
-    id: "aquaventure",
-    image: "https://images.unsplash.com/photo-1559599746-c0f80c6d2b5e?w=600&q=80",
-    title: "Aquaventure Waterpark Atlantis",
-    location: "Dubai",
-    duration: "Full Day",
-    price: 320,
-    rating: 4.8,
-    reviewCount: 1567,
-    category: "Water Activities",
-  },
-  {
-    id: "dubai-frame",
-    image: "https://images.unsplash.com/photo-1597659840241-37e2b9c2f55f?w=600&q=80",
-    title: "Dubai Frame Entry Tickets",
-    location: "Dubai",
-    duration: "1-2 Hours",
-    price: 50,
-    rating: 4.5,
-    reviewCount: 2341,
-    category: "Attractions",
-  },
-];
-
-const categories = [
-  "Desert Safari",
-  "City Tours",
-  "Attractions",
-  "Water Activities",
-  "Theme Parks",
-];
-
-const locations = ["Dubai", "Abu Dhabi", "Sharjah", "Ras Al Khaimah"];
-
-const durations = ["1-2 Hours", "2-3 Hours", "4-5 Hours", "6-7 Hours", "Full Day"];
-
-const MAX_PRICE = 500;
+const MAX_PRICE = 2000;
 
 export default function ToursListing() {
-  const [filters, setFilters] = useState<FilterState>({
-    search: "",
-    categories: [],
-    locations: [],
-    priceRange: [0, MAX_PRICE],
-    durations: [],
+  const [searchParams] = useSearchParams();
+  const initialCategory = searchParams.get("category");
+  const initialLocation = searchParams.get("location");
+
+  const { data: tours = [], isLoading } = useTours();
+  const { data: categoriesData = [] } = useCategories();
+  const { data: locationsData = [] } = useLocations();
+
+  const categories = categoriesData.map((c) => c.name);
+  const locations = locationsData.map((l) => l.name);
+  const durations = ["1-2 Hours", "2-3 Hours", "3 Hours", "4-5 Hours", "6 Hours", "6-7 Hours", "8 Hours", "Full Day"];
+
+  const [filters, setFilters] = useState<FilterState>(() => {
+    const initialCategories: string[] = [];
+    const initialLocations: string[] = [];
+
+    if (initialCategory) {
+      const cat = categoriesData.find((c) => c.slug === initialCategory);
+      if (cat) initialCategories.push(cat.name);
+    }
+    if (initialLocation) {
+      const loc = locationsData.find((l) => l.slug === initialLocation);
+      if (loc) initialLocations.push(loc.name);
+    }
+
+    return {
+      search: "",
+      categories: initialCategories,
+      locations: initialLocations,
+      priceRange: [0, MAX_PRICE],
+      durations: [],
+    };
   });
   const [sortBy, setSortBy] = useState("recommended");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
+  const formattedTours = useMemo(() => {
+    return tours.map((tour) => ({
+      id: tour.slug,
+      image: tour.main_image || tour.images?.[0] || "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600",
+      title: tour.title,
+      location: tour.location?.name || "UAE",
+      duration: tour.duration,
+      price: Number(tour.price),
+      originalPrice: tour.original_price ? Number(tour.original_price) : undefined,
+      rating: tour.rating || 0,
+      reviewCount: tour.review_count || 0,
+      badge: tour.is_bestseller ? "Bestseller" : tour.discount_percent && tour.discount_percent > 0 ? `${tour.discount_percent}% Off` : undefined,
+      category: tour.category?.name || "Other",
+      bookingCount: tour.booking_count || 0,
+    }));
+  }, [tours]);
+
   const filteredTours = useMemo(() => {
-    let result = [...allTours];
+    let result = [...formattedTours];
 
     // Search filter
     if (filters.search) {
@@ -226,7 +115,7 @@ export default function ToursListing() {
     // Duration filter
     if (filters.durations.length > 0) {
       result = result.filter((tour) =>
-        filters.durations.includes(tour.duration)
+        filters.durations.some((d) => tour.duration.includes(d.replace("-", " ").replace(" Hours", "")))
       );
     }
 
@@ -242,15 +131,15 @@ export default function ToursListing() {
         result.sort((a, b) => b.rating - a.rating);
         break;
       case "popular":
-        result.sort((a, b) => b.reviewCount - a.reviewCount);
+        result.sort((a, b) => b.bookingCount - a.bookingCount);
         break;
       default:
-        // recommended - keep original order
+        // recommended - keep original order (by booking count from API)
         break;
     }
 
     return result;
-  }, [filters, sortBy]);
+  }, [formattedTours, filters, sortBy]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -381,7 +270,11 @@ export default function ToursListing() {
             </div>
 
             {/* Tours Grid/List */}
-            {filteredTours.length > 0 ? (
+            {isLoading ? (
+              <div className="flex items-center justify-center py-16">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : filteredTours.length > 0 ? (
               <div
                 className={cn(
                   viewMode === "grid"
