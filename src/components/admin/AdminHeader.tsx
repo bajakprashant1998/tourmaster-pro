@@ -1,4 +1,4 @@
-import { Menu, Eye, ChevronDown, Bell, Search } from "lucide-react";
+import { Menu, Eye, ChevronDown, Bell, Search, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -7,6 +7,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 interface AdminHeaderProps {
   title: string;
@@ -15,6 +17,17 @@ interface AdminHeaderProps {
 }
 
 export function AdminHeader({ title, onMenuToggle, breadcrumb }: AdminHeaderProps) {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/admin/login");
+  };
+
+  const displayName = user?.email?.split("@")[0] || "Admin";
+  const initial = displayName.charAt(0).toUpperCase();
+
   return (
     <header className="h-16 bg-header border-b border-header flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
       <div className="flex items-center gap-4">
@@ -57,7 +70,6 @@ export function AdminHeader({ title, onMenuToggle, breadcrumb }: AdminHeaderProp
       </div>
 
       <div className="flex items-center gap-3">
-        {/* Search */}
         <div className="hidden md:flex items-center relative">
           <Search className="w-4 h-4 absolute left-3 text-muted-foreground" />
           <input
@@ -67,22 +79,20 @@ export function AdminHeader({ title, onMenuToggle, breadcrumb }: AdminHeaderProp
           />
         </div>
 
-        {/* Notifications */}
         <button className="relative p-2 hover:bg-muted rounded-md transition-colors">
           <Bell className="w-5 h-5 text-muted-foreground" />
           <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
         </button>
 
-        {/* User Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-2 hover:bg-muted rounded-md px-2 py-1.5 transition-colors">
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-sm font-medium text-primary">B</span>
+                <span className="text-sm font-medium text-primary">{initial}</span>
               </div>
               <div className="hidden sm:block text-left">
-                <p className="text-sm font-medium text-foreground">Betterview</p>
-                <p className="text-xs text-muted-foreground">admin@admin.com</p>
+                <p className="text-sm font-medium text-foreground">{displayName}</p>
+                <p className="text-xs text-muted-foreground">{user?.email}</p>
               </div>
               <ChevronDown className="w-4 h-4 text-muted-foreground hidden sm:block" />
             </button>
@@ -91,7 +101,10 @@ export function AdminHeader({ title, onMenuToggle, breadcrumb }: AdminHeaderProp
             <DropdownMenuItem>My Profile</DropdownMenuItem>
             <DropdownMenuItem>Account Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">Logout</DropdownMenuItem>
+            <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

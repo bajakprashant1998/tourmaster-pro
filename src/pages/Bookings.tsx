@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,49 +7,24 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Search,
-  Filter,
-  MoreHorizontal,
-  Eye,
-  Edit,
-  Trash2,
-  Download,
-  CalendarDays,
-  TableIcon,
-  Users,
-  Clock,
-  DollarSign,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  RefreshCw,
-  Mail,
-  Phone,
+  Search, Filter, MoreHorizontal, Eye, Edit, Trash2, Download,
+  CalendarDays, TableIcon, Users, Clock, DollarSign, CheckCircle,
+  XCircle, RefreshCw, Mail, Phone,
 } from "lucide-react";
 import { BookingDetailsDrawer } from "@/components/admin/BookingDetailsDrawer";
+import { useAdminBookings, useUpdateBookingStatus } from "@/hooks/useAdminBookings";
+import { Skeleton } from "@/components/ui/skeleton";
 
-interface Booking {
+interface BookingDrawerData {
   id: string;
   bookingRef: string;
   customerName: string;
@@ -65,144 +40,41 @@ interface Booking {
   createdAt: Date;
 }
 
-const mockBookings: Booking[] = [
-  {
-    id: "1",
-    bookingRef: "BV-2026-001",
-    customerName: "John Smith",
-    customerEmail: "john@example.com",
-    customerPhone: "+971 50 123 4567",
-    tourName: "Desert Safari Adventure",
-    tourDate: new Date(2026, 0, 20),
-    guests: 4,
-    totalAmount: 800,
-    paidAmount: 800,
-    status: "confirmed",
-    paymentStatus: "paid",
-    createdAt: new Date(2026, 0, 15),
-  },
-  {
-    id: "2",
-    bookingRef: "BV-2026-002",
-    customerName: "Sarah Johnson",
-    customerEmail: "sarah@example.com",
-    customerPhone: "+971 55 987 6543",
-    tourName: "Dubai City Tour",
-    tourDate: new Date(2026, 0, 22),
-    guests: 2,
-    totalAmount: 300,
-    paidAmount: 150,
-    status: "pending",
-    paymentStatus: "partial",
-    createdAt: new Date(2026, 0, 16),
-  },
-  {
-    id: "3",
-    bookingRef: "BV-2026-003",
-    customerName: "Mohammed Al-Hassan",
-    customerEmail: "mohammed@example.com",
-    customerPhone: "+971 52 456 7890",
-    tourName: "Abu Dhabi Grand Mosque Tour",
-    tourDate: new Date(2026, 0, 18),
-    guests: 6,
-    totalAmount: 900,
-    paidAmount: 900,
-    status: "completed",
-    paymentStatus: "paid",
-    createdAt: new Date(2026, 0, 10),
-  },
-  {
-    id: "4",
-    bookingRef: "BV-2026-004",
-    customerName: "Emily Chen",
-    customerEmail: "emily@example.com",
-    customerPhone: "+971 58 321 0987",
-    tourName: "Yacht Cruise Dubai Marina",
-    tourDate: new Date(2026, 0, 25),
-    guests: 8,
-    totalAmount: 2400,
-    paidAmount: 0,
-    status: "pending",
-    paymentStatus: "unpaid",
-    createdAt: new Date(2026, 0, 17),
-  },
-  {
-    id: "5",
-    bookingRef: "BV-2026-005",
-    customerName: "David Williams",
-    customerEmail: "david@example.com",
-    customerPhone: "+971 54 654 3210",
-    tourName: "Hot Air Balloon Ride",
-    tourDate: new Date(2026, 0, 19),
-    guests: 2,
-    totalAmount: 600,
-    paidAmount: 600,
-    status: "cancelled",
-    paymentStatus: "refunded",
-    createdAt: new Date(2026, 0, 12),
-  },
-  {
-    id: "6",
-    bookingRef: "BV-2026-006",
-    customerName: "Fatima Al-Sayed",
-    customerEmail: "fatima@example.com",
-    customerPhone: "+971 56 789 0123",
-    tourName: "Burj Khalifa At The Top",
-    tourDate: new Date(2026, 0, 21),
-    guests: 3,
-    totalAmount: 450,
-    paidAmount: 450,
-    status: "confirmed",
-    paymentStatus: "paid",
-    createdAt: new Date(2026, 0, 14),
-  },
-  {
-    id: "7",
-    bookingRef: "BV-2026-007",
-    customerName: "Michael Brown",
-    customerEmail: "michael@example.com",
-    customerPhone: "+971 50 234 5678",
-    tourName: "Desert Safari Adventure",
-    tourDate: new Date(2026, 0, 23),
-    guests: 5,
-    totalAmount: 1000,
-    paidAmount: 500,
-    status: "confirmed",
-    paymentStatus: "partial",
-    createdAt: new Date(2026, 0, 16),
-  },
-  {
-    id: "8",
-    bookingRef: "BV-2026-008",
-    customerName: "Lisa Anderson",
-    customerEmail: "lisa@example.com",
-    customerPhone: "+971 55 876 5432",
-    tourName: "Dhow Cruise Dinner",
-    tourDate: new Date(2026, 0, 24),
-    guests: 2,
-    totalAmount: 200,
-    paidAmount: 200,
-    status: "completed",
-    paymentStatus: "paid",
-    createdAt: new Date(2026, 0, 13),
-  },
-];
-
 const Bookings = () => {
+  const { data: bookings, isLoading } = useAdminBookings();
+  const updateStatus = useUpdateBookingStatus();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [paymentFilter, setPaymentFilter] = useState<string>("all");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [activeTab, setActiveTab] = useState("table");
-  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<BookingDrawerData | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const handleViewBooking = (booking: Booking) => {
+  const mapped = useMemo(() => {
+    return (bookings || []).map((b) => ({
+      id: b.id,
+      bookingRef: b.booking_ref,
+      customerName: b.customer_name,
+      customerEmail: b.customer_email,
+      customerPhone: b.customer_phone || "",
+      tourName: (b.tour as any)?.title || "Unknown Tour",
+      tourDate: new Date(b.tour_date),
+      guests: b.adults + (b.children || 0),
+      totalAmount: Number(b.total_amount),
+      paidAmount: Number(b.paid_amount || 0),
+      status: (b.status || "pending") as BookingDrawerData["status"],
+      paymentStatus: (b.payment_status || "unpaid") as BookingDrawerData["paymentStatus"],
+      createdAt: new Date(b.created_at),
+    }));
+  }, [bookings]);
+
+  const handleViewBooking = (booking: BookingDrawerData) => {
     setSelectedBooking(booking);
     setDrawerOpen(true);
   };
 
-  const filteredBookings = mockBookings.filter((booking) => {
+  const filteredBookings = mapped.filter((booking) => {
     const matchesSearch =
       booking.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       booking.bookingRef.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -213,17 +85,17 @@ const Bookings = () => {
   });
 
   const stats = {
-    total: mockBookings.length,
-    pending: mockBookings.filter((b) => b.status === "pending").length,
-    confirmed: mockBookings.filter((b) => b.status === "confirmed").length,
-    completed: mockBookings.filter((b) => b.status === "completed").length,
-    cancelled: mockBookings.filter((b) => b.status === "cancelled").length,
-    totalRevenue: mockBookings
+    total: mapped.length,
+    pending: mapped.filter((b) => b.status === "pending").length,
+    confirmed: mapped.filter((b) => b.status === "confirmed").length,
+    completed: mapped.filter((b) => b.status === "completed").length,
+    cancelled: mapped.filter((b) => b.status === "cancelled").length,
+    totalRevenue: mapped
       .filter((b) => b.status !== "cancelled")
       .reduce((sum, b) => sum + b.paidAmount, 0),
   };
 
-  const getStatusBadge = (status: Booking["status"]) => {
+  const getStatusBadge = (status: BookingDrawerData["status"]) => {
     const styles = {
       pending: "bg-amber-500/10 text-amber-500 border-amber-500/20",
       confirmed: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
@@ -244,7 +116,7 @@ const Bookings = () => {
     );
   };
 
-  const getPaymentBadge = (status: Booking["paymentStatus"]) => {
+  const getPaymentBadge = (status: BookingDrawerData["paymentStatus"]) => {
     const styles = {
       unpaid: "bg-red-500/10 text-red-500 border-red-500/20",
       partial: "bg-amber-500/10 text-amber-500 border-amber-500/20",
@@ -259,7 +131,7 @@ const Bookings = () => {
   };
 
   const getBookingsForDate = (date: Date) => {
-    return mockBookings.filter(
+    return mapped.filter(
       (booking) =>
         booking.tourDate.getDate() === date.getDate() &&
         booking.tourDate.getMonth() === date.getMonth() &&
@@ -267,7 +139,7 @@ const Bookings = () => {
     );
   };
 
-  const bookingDates = mockBookings.map((b) => b.tourDate);
+  const bookingDates = mapped.map((b) => b.tourDate);
 
   return (
     <AdminLayout title="Bookings Management" breadcrumb={["Bookings"]}>
@@ -300,7 +172,7 @@ const Bookings = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total</p>
-                  <p className="text-xl font-bold">{stats.total}</p>
+                  <p className="text-xl font-bold">{isLoading ? "—" : stats.total}</p>
                 </div>
               </div>
             </CardContent>
@@ -313,7 +185,7 @@ const Bookings = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Pending</p>
-                  <p className="text-xl font-bold">{stats.pending}</p>
+                  <p className="text-xl font-bold">{isLoading ? "—" : stats.pending}</p>
                 </div>
               </div>
             </CardContent>
@@ -326,7 +198,7 @@ const Bookings = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Confirmed</p>
-                  <p className="text-xl font-bold">{stats.confirmed}</p>
+                  <p className="text-xl font-bold">{isLoading ? "—" : stats.confirmed}</p>
                 </div>
               </div>
             </CardContent>
@@ -339,7 +211,7 @@ const Bookings = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Completed</p>
-                  <p className="text-xl font-bold">{stats.completed}</p>
+                  <p className="text-xl font-bold">{isLoading ? "—" : stats.completed}</p>
                 </div>
               </div>
             </CardContent>
@@ -352,7 +224,7 @@ const Bookings = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Cancelled</p>
-                  <p className="text-xl font-bold">{stats.cancelled}</p>
+                  <p className="text-xl font-bold">{isLoading ? "—" : stats.cancelled}</p>
                 </div>
               </div>
             </CardContent>
@@ -365,7 +237,7 @@ const Bookings = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Revenue</p>
-                  <p className="text-xl font-bold">${stats.totalRevenue.toLocaleString()}</p>
+                  <p className="text-xl font-bold">${isLoading ? "—" : stats.totalRevenue.toLocaleString()}</p>
                 </div>
               </div>
             </CardContent>
@@ -449,74 +321,75 @@ const Bookings = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredBookings.map((booking) => (
-                      <TableRow key={booking.id}>
-                        <TableCell className="font-medium">{booking.bookingRef}</TableCell>
-                        <TableCell>
-                          <div>
-                            <p className="font-medium">{booking.customerName}</p>
-                            <p className="text-sm text-muted-foreground">{booking.customerEmail}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell className="max-w-[200px] truncate">{booking.tourName}</TableCell>
-                        <TableCell>
-                          {booking.tourDate.toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Users className="w-4 h-4 text-muted-foreground" />
-                            {booking.guests}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <p className="font-medium">${booking.totalAmount}</p>
-                            {booking.paidAmount < booking.totalAmount && (
-                              <p className="text-sm text-muted-foreground">
-                                Paid: ${booking.paidAmount}
-                              </p>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>{getStatusBadge(booking.status)}</TableCell>
-                        <TableCell>{getPaymentBadge(booking.paymentStatus)}</TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleViewBooking(booking)}>
-                                <Eye className="w-4 h-4 mr-2" />
-                                View Details
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Edit className="w-4 h-4 mr-2" />
-                                Edit Booking
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Mail className="w-4 h-4 mr-2" />
-                                Send Email
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Phone className="w-4 h-4 mr-2" />
-                                Call Customer
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive">
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                Cancel Booking
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
+                    {isLoading ? (
+                      Array.from({ length: 5 }).map((_, i) => (
+                        <TableRow key={i}>
+                          {Array.from({ length: 9 }).map((_, j) => (
+                            <TableCell key={j}><Skeleton className="h-4 w-16" /></TableCell>
+                          ))}
+                        </TableRow>
+                      ))
+                    ) : filteredBookings.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">No bookings found</TableCell>
                       </TableRow>
-                    ))}
+                    ) : (
+                      filteredBookings.map((booking) => (
+                        <TableRow key={booking.id}>
+                          <TableCell className="font-medium">{booking.bookingRef}</TableCell>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{booking.customerName}</p>
+                              <p className="text-sm text-muted-foreground">{booking.customerEmail}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell className="max-w-[200px] truncate">{booking.tourName}</TableCell>
+                          <TableCell>
+                            {booking.tourDate.toLocaleDateString("en-US", {
+                              month: "short", day: "numeric", year: "numeric",
+                            })}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Users className="w-4 h-4 text-muted-foreground" />
+                              {booking.guests}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">${booking.totalAmount}</p>
+                              {booking.paidAmount < booking.totalAmount && (
+                                <p className="text-sm text-muted-foreground">
+                                  Paid: ${booking.paidAmount}
+                                </p>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>{getStatusBadge(booking.status)}</TableCell>
+                          <TableCell>{getPaymentBadge(booking.paymentStatus)}</TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="w-4 h-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleViewBooking(booking)}>
+                                  <Eye className="w-4 h-4 mr-2" /> View Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => updateStatus.mutate({ id: booking.id, status: "confirmed" })}>
+                                  <CheckCircle className="w-4 h-4 mr-2" /> Confirm
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="text-destructive" onClick={() => updateStatus.mutate({ id: booking.id, status: "cancelled" })}>
+                                  <XCircle className="w-4 h-4 mr-2" /> Cancel
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -536,9 +409,7 @@ const Bookings = () => {
                     selected={selectedDate}
                     onSelect={setSelectedDate}
                     className="rounded-md border"
-                    modifiers={{
-                      booked: bookingDates,
-                    }}
+                    modifiers={{ booked: bookingDates }}
                     modifiersStyles={{
                       booked: {
                         backgroundColor: "hsl(var(--primary) / 0.1)",
@@ -559,10 +430,7 @@ const Bookings = () => {
                   <CardTitle className="text-lg">
                     Bookings for{" "}
                     {selectedDate?.toLocaleDateString("en-US", {
-                      weekday: "long",
-                      month: "long",
-                      day: "numeric",
-                      year: "numeric",
+                      weekday: "long", month: "long", day: "numeric", year: "numeric",
                     })}
                   </CardTitle>
                 </CardHeader>
@@ -570,44 +438,27 @@ const Bookings = () => {
                   {selectedDate && getBookingsForDate(selectedDate).length > 0 ? (
                     <div className="space-y-4">
                       {getBookingsForDate(selectedDate).map((booking) => (
-                        <div
-                          key={booking.id}
-                          className="p-4 rounded-lg border bg-card hover:shadow-md transition-shadow"
-                        >
+                        <div key={booking.id} className="p-4 rounded-lg border bg-card hover:shadow-md transition-shadow">
                           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-2">
-                                <span className="font-mono text-sm text-muted-foreground">
-                                  {booking.bookingRef}
-                                </span>
+                                <span className="font-mono text-sm text-muted-foreground">{booking.bookingRef}</span>
                                 {getStatusBadge(booking.status)}
                                 {getPaymentBadge(booking.paymentStatus)}
                               </div>
                               <h4 className="font-semibold text-lg">{booking.tourName}</h4>
                               <div className="flex flex-wrap gap-4 mt-2 text-sm text-muted-foreground">
-                                <div className="flex items-center gap-1">
-                                  <Users className="w-4 h-4" />
-                                  {booking.guests} guests
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <DollarSign className="w-4 h-4" />$
-                                  {booking.totalAmount}
-                                </div>
+                                <div className="flex items-center gap-1"><Users className="w-4 h-4" />{booking.guests} guests</div>
+                                <div className="flex items-center gap-1"><DollarSign className="w-4 h-4" />${booking.totalAmount}</div>
                               </div>
                             </div>
                             <div className="text-right">
                               <p className="font-medium">{booking.customerName}</p>
                               <p className="text-sm text-muted-foreground">{booking.customerEmail}</p>
-                              <p className="text-sm text-muted-foreground">{booking.customerPhone}</p>
                             </div>
                             <div className="flex gap-2">
                               <Button variant="outline" size="sm" onClick={() => handleViewBooking(booking)}>
-                                <Eye className="w-4 h-4 mr-1" />
-                                View
-                              </Button>
-                              <Button variant="outline" size="sm">
-                                <Edit className="w-4 h-4 mr-1" />
-                                Edit
+                                <Eye className="w-4 h-4 mr-1" /> View
                               </Button>
                             </div>
                           </div>
@@ -618,9 +469,7 @@ const Bookings = () => {
                     <div className="text-center py-12">
                       <CalendarDays className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                       <h3 className="font-medium text-lg mb-1">No bookings for this date</h3>
-                      <p className="text-muted-foreground">
-                        Select a highlighted date to view bookings
-                      </p>
+                      <p className="text-muted-foreground">Select a highlighted date to view bookings</p>
                     </div>
                   )}
                 </CardContent>
@@ -629,7 +478,6 @@ const Bookings = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Booking Details Drawer */}
         <BookingDetailsDrawer
           booking={selectedBooking}
           open={drawerOpen}
