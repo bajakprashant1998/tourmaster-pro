@@ -208,8 +208,10 @@ export type Database = {
           name: string
           original_price: number | null
           price: number
+          quantity: string | null
           sort_order: number | null
           tour_id: string
+          transfer_option: string | null
         }
         Insert: {
           created_at?: string
@@ -218,8 +220,10 @@ export type Database = {
           name: string
           original_price?: number | null
           price: number
+          quantity?: string | null
           sort_order?: number | null
           tour_id: string
+          transfer_option?: string | null
         }
         Update: {
           created_at?: string
@@ -228,8 +232,10 @@ export type Database = {
           name?: string
           original_price?: number | null
           price?: number
+          quantity?: string | null
           sort_order?: number | null
           tour_id?: string
+          transfer_option?: string | null
         }
         Relationships: [
           {
@@ -243,88 +249,163 @@ export type Database = {
       }
       tours: {
         Row: {
+          activity_timing_items: Json
+          activity_timing_title: string | null
+          banner_image_url: string | null
           booking_count: number | null
           category_id: string | null
+          child_age_adult_label: string | null
+          child_age_child_label: string | null
+          child_age_infant_label: string | null
           created_at: string
           description: string | null
+          disable_add_to_cart: boolean
           discount_percent: number | null
+          dropback_time: string | null
           duration: string
+          duration_unit: string
+          enable_faqs: boolean
           excludes: string[] | null
+          featured_availability: string
           group_size: string | null
           highlights: string[] | null
+          homepage_image_url: string | null
+          homepage_top_abudhabi: boolean
+          homepage_top_dubai: boolean
           id: string
           images: string[] | null
           includes: string[] | null
+          information_blocks: Json
           is_bestseller: boolean | null
           is_featured: boolean | null
           itinerary: Json | null
           location_id: string | null
           main_image: string | null
+          max_people: number | null
+          min_people: number | null
+          mobile_feature_image_url: string | null
           original_price: number | null
+          pickup_time: string | null
           price: number
           rating: number | null
+          related_tour_ids: string[]
           review_count: number | null
+          seo_meta_description: string | null
+          seo_meta_keyword: string | null
+          seo_meta_tag: string | null
+          seo_meta_title: string | null
           short_description: string | null
           slug: string
           status: string | null
           title: string
           updated_at: string
+          youtube_url: string | null
         }
         Insert: {
+          activity_timing_items?: Json
+          activity_timing_title?: string | null
+          banner_image_url?: string | null
           booking_count?: number | null
           category_id?: string | null
+          child_age_adult_label?: string | null
+          child_age_child_label?: string | null
+          child_age_infant_label?: string | null
           created_at?: string
           description?: string | null
+          disable_add_to_cart?: boolean
           discount_percent?: number | null
+          dropback_time?: string | null
           duration: string
+          duration_unit?: string
+          enable_faqs?: boolean
           excludes?: string[] | null
+          featured_availability?: string
           group_size?: string | null
           highlights?: string[] | null
+          homepage_image_url?: string | null
+          homepage_top_abudhabi?: boolean
+          homepage_top_dubai?: boolean
           id?: string
           images?: string[] | null
           includes?: string[] | null
+          information_blocks?: Json
           is_bestseller?: boolean | null
           is_featured?: boolean | null
           itinerary?: Json | null
           location_id?: string | null
           main_image?: string | null
+          max_people?: number | null
+          min_people?: number | null
+          mobile_feature_image_url?: string | null
           original_price?: number | null
+          pickup_time?: string | null
           price: number
           rating?: number | null
+          related_tour_ids?: string[]
           review_count?: number | null
+          seo_meta_description?: string | null
+          seo_meta_keyword?: string | null
+          seo_meta_tag?: string | null
+          seo_meta_title?: string | null
           short_description?: string | null
           slug: string
           status?: string | null
           title: string
           updated_at?: string
+          youtube_url?: string | null
         }
         Update: {
+          activity_timing_items?: Json
+          activity_timing_title?: string | null
+          banner_image_url?: string | null
           booking_count?: number | null
           category_id?: string | null
+          child_age_adult_label?: string | null
+          child_age_child_label?: string | null
+          child_age_infant_label?: string | null
           created_at?: string
           description?: string | null
+          disable_add_to_cart?: boolean
           discount_percent?: number | null
+          dropback_time?: string | null
           duration?: string
+          duration_unit?: string
+          enable_faqs?: boolean
           excludes?: string[] | null
+          featured_availability?: string
           group_size?: string | null
           highlights?: string[] | null
+          homepage_image_url?: string | null
+          homepage_top_abudhabi?: boolean
+          homepage_top_dubai?: boolean
           id?: string
           images?: string[] | null
           includes?: string[] | null
+          information_blocks?: Json
           is_bestseller?: boolean | null
           is_featured?: boolean | null
           itinerary?: Json | null
           location_id?: string | null
           main_image?: string | null
+          max_people?: number | null
+          min_people?: number | null
+          mobile_feature_image_url?: string | null
           original_price?: number | null
+          pickup_time?: string | null
           price?: number
           rating?: number | null
+          related_tour_ids?: string[]
           review_count?: number | null
+          seo_meta_description?: string | null
+          seo_meta_keyword?: string | null
+          seo_meta_tag?: string | null
+          seo_meta_title?: string | null
           short_description?: string | null
           slug?: string
           status?: string | null
           title?: string
           updated_at?: string
+          youtube_url?: string | null
         }
         Relationships: [
           {
