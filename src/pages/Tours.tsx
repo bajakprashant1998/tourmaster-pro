@@ -171,7 +171,7 @@ export default function Tours() {
                           <DropdownMenuItem onClick={() => window.open(`/tour/${tour.slug}`, "_blank")}>
                             <Eye className="w-4 h-4 mr-2" /> View
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => navigate("/tours/edit")}>
+                          <DropdownMenuItem onClick={() => navigate(`/tours/edit/${tour.id}`)}>
                             <Edit className="w-4 h-4 mr-2" /> Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem className="text-destructive" onClick={() => deleteTour.mutate(tour.id)}>

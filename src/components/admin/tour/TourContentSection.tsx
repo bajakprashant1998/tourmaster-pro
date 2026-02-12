@@ -20,17 +20,19 @@ interface TourContentSectionProps {
     disableAddToCart: boolean;
   };
   onChange: (data: any) => void;
+  categories?: { id: string; name: string }[];
 }
 
-export function TourContentSection({ data, onChange }: TourContentSectionProps) {
-  const categories = [
-    "Adventure Tours",
-    "City Tours",
-    "Cultural Tours",
-    "Desert Safari",
-    "Water Sports",
-    "Luxury Experiences",
+export function TourContentSection({ data, onChange, categories: categoriesProp }: TourContentSectionProps) {
+  const defaultCategories = [
+    { id: "Adventure Tours", name: "Adventure Tours" },
+    { id: "City Tours", name: "City Tours" },
+    { id: "Cultural Tours", name: "Cultural Tours" },
+    { id: "Desert Safari", name: "Desert Safari" },
+    { id: "Water Sports", name: "Water Sports" },
+    { id: "Luxury Experiences", name: "Luxury Experiences" },
   ];
+  const categories = categoriesProp && categoriesProp.length > 0 ? categoriesProp : defaultCategories;
 
   return (
     <div className="admin-card animate-fade-in">
@@ -72,8 +74,8 @@ export function TourContentSection({ data, onChange }: TourContentSectionProps) 
             </SelectTrigger>
             <SelectContent>
               {categories.map((cat) => (
-                <SelectItem key={cat} value={cat}>
-                  {cat}
+                <SelectItem key={cat.id} value={cat.id}>
+                  {cat.name}
                 </SelectItem>
               ))}
             </SelectContent>

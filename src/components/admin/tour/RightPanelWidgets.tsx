@@ -17,11 +17,13 @@ interface RightPanelWidgetsProps {
   lastSaved: string;
   location: string;
   onLocationChange: (location: string) => void;
+  locations?: { id: string; name: string }[];
   homepageSettings: {
     topDubai: boolean;
     topAbuDhabi: boolean;
   };
   onHomepageChange: (settings: any) => void;
+  isSaving?: boolean;
 }
 
 export function RightPanelWidgets({
@@ -31,10 +33,19 @@ export function RightPanelWidgets({
   lastSaved,
   location,
   onLocationChange,
+  locations: locationsProp,
   homepageSettings,
   onHomepageChange,
+  isSaving,
 }: RightPanelWidgetsProps) {
-  const locations = ["Dubai", "Abu Dhabi", "Sharjah", "Ajman", "Ras Al Khaimah"];
+  const defaultLocations = [
+    { id: "Dubai", name: "Dubai" },
+    { id: "Abu Dhabi", name: "Abu Dhabi" },
+    { id: "Sharjah", name: "Sharjah" },
+    { id: "Ajman", name: "Ajman" },
+    { id: "Ras Al Khaimah", name: "Ras Al Khaimah" },
+  ];
+  const locations = locationsProp && locationsProp.length > 0 ? locationsProp : defaultLocations;
 
   return (
     <div className="space-y-4">
@@ -76,9 +87,10 @@ export function RightPanelWidgets({
           <Button
             onClick={onSave}
             className="w-full bg-primary hover:bg-primary/90"
+            disabled={isSaving}
           >
             <Save className="w-4 h-4 mr-2" />
-            Save Changes
+            {isSaving ? "Saving..." : "Save Changes"}
           </Button>
 
           <p className="text-xs text-center text-muted-foreground animate-pulse-subtle">
@@ -147,8 +159,8 @@ export function RightPanelWidgets({
             </SelectTrigger>
             <SelectContent>
               {locations.map((loc) => (
-                <SelectItem key={loc} value={loc}>
-                  - {loc}
+                <SelectItem key={loc.id} value={loc.id}>
+                  - {loc.name}
                 </SelectItem>
               ))}
             </SelectContent>

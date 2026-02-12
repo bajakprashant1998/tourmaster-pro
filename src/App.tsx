@@ -65,7 +65,7 @@ const App = () => (
           <Route path="/reviews/pending" element={<AdminRoute><Reviews /></AdminRoute>} />
           <Route path="/tours" element={<AdminRoute><Tours /></AdminRoute>} />
           <Route path="/tours/add" element={<AdminRoute><EditTour /></AdminRoute>} />
-          <Route path="/tours/edit" element={<AdminRoute><EditTour /></AdminRoute>} />
+          <Route path="/tours/edit/:id" element={<AdminRoute><EditTour /></AdminRoute>} />
           <Route path="/things-to-do" element={<AdminRoute><ThingsToDo /></AdminRoute>} />
           <Route path="/visa" element={<AdminRoute><Visa /></AdminRoute>} />
           <Route path="/visa/applications" element={<AdminRoute><Visa /></AdminRoute>} />
