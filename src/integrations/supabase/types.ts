@@ -119,6 +119,87 @@ export type Database = {
         }
         Relationships: []
       }
+      holidays: {
+        Row: {
+          bookings: number
+          created_at: string
+          description: string | null
+          duration: string
+          id: string
+          image: string | null
+          name: string
+          price: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          bookings?: number
+          created_at?: string
+          description?: string | null
+          duration: string
+          id?: string
+          image?: string | null
+          name: string
+          price?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          bookings?: number
+          created_at?: string
+          description?: string | null
+          duration?: string
+          id?: string
+          image?: string | null
+          name?: string
+          price?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      hotels: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image: string | null
+          location: string
+          name: string
+          price: number
+          rating: number
+          rooms: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image?: string | null
+          location: string
+          name: string
+          price?: number
+          rating?: number
+          rooms?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image?: string | null
+          location?: string
+          name?: string
+          price?: number
+          rating?: number
+          rooms?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       locations: {
         Row: {
           country: string | null
@@ -140,6 +221,48 @@ export type Database = {
           id?: string
           name?: string
           slug?: string
+        }
+        Relationships: []
+      }
+      rent_cars: {
+        Row: {
+          created_at: string
+          description: string | null
+          fuel: string
+          id: string
+          image: string | null
+          name: string
+          price: number
+          seats: number
+          status: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          fuel?: string
+          id?: string
+          image?: string | null
+          name: string
+          price?: number
+          seats?: number
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          fuel?: string
+          id?: string
+          image?: string | null
+          name?: string
+          price?: number
+          seats?: number
+          status?: string
+          type?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -199,6 +322,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      things_to_do: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          image: string | null
+          is_featured: boolean
+          location: string
+          name: string
+          price: number
+          rating: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image?: string | null
+          is_featured?: boolean
+          location?: string
+          name: string
+          price?: number
+          rating?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image?: string | null
+          is_featured?: boolean
+          location?: string
+          name?: string
+          price?: number
+          rating?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       tour_pricing_options: {
         Row: {
