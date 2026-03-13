@@ -358,6 +358,9 @@ export default function EditTour() {
           </div>
           <div id="pricing">
             <PricingSection data={pricing} onChange={setPricing} />
+            <div className="mt-6">
+              <PricingRulesSection tourId={id} />
+            </div>
           </div>
           <div id="info">
             <InformationSection data={information} onChange={setInformation} />
