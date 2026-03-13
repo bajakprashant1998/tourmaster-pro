@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Minus, Plus, ShieldCheck, User, Mail, Phone, Loader2 } from "lucide-react";
+import { Calendar as CalendarIcon, Minus, Plus, ShieldCheck, User, Mail, Phone, Loader2, Tag, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useCreateBooking } from "@/hooks/useBookings";
+import { useApplyPricingRules } from "@/hooks/usePricingCalculator";
 
 interface PricingOption {
   id: string;
@@ -46,6 +47,8 @@ export function BookingForm({ tourId, pricingOptions, basePrice, originalPrice }
   const [selectedOption, setSelectedOption] = useState<string>(pricingOptions[0]?.id || "");
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
+  const [promoCode, setPromoCode] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState("");
   const [showBookingDialog, setShowBookingDialog] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
@@ -56,12 +59,30 @@ export function BookingForm({ tourId, pricingOptions, basePrice, originalPrice }
 
   const selectedPricing = pricingOptions.find((opt) => opt.id === selectedOption);
   const pricePerPerson = selectedPricing?.price || basePrice;
-  const totalPrice = pricePerPerson * adults + (pricePerPerson * 0.5 * children);
+  const subtotal = pricePerPerson * adults + (pricePerPerson * 0.5 * children);
+  const groupSize = adults + children;
+
+  const { appliedDiscounts, totalDiscount, finalPrice } = useApplyPricingRules({
+    tourId,
+    tourDate: date,
+    groupSize,
+    promoCode: appliedPromo,
+    subtotal,
+  });
+
+  const handleApplyPromo = () => {
+    if (promoCode.trim()) {
+      setAppliedPromo(promoCode.trim());
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo("");
+    setPromoCode("");
+  };
 
   const handleBookNow = () => {
-    if (!date) {
-      return;
-    }
+    if (!date) return;
     setShowBookingDialog(true);
   };
 
@@ -78,7 +99,7 @@ export function BookingForm({ tourId, pricingOptions, basePrice, originalPrice }
         tour_date: format(date, "yyyy-MM-dd"),
         adults,
         children,
-        total_amount: totalPrice,
+        total_amount: finalPrice,
       });
       
       setBookingSuccess(result.booking_ref);
@@ -229,14 +250,77 @@ export function BookingForm({ tourId, pricingOptions, basePrice, originalPrice }
             </div>
           </div>
 
-          {/* Total */}
-          <div className="pt-4 border-t border-border">
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-muted-foreground">Total</span>
+          {/* Promo Code */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Promo Code
+            </label>
+            {appliedPromo ? (
+              <div className="flex items-center justify-between p-3 rounded-lg border border-primary/30 bg-primary/5">
+                <div className="flex items-center gap-2">
+                  <Tag className="w-4 h-4 text-primary" />
+                  <code className="text-sm font-mono font-medium text-primary">{appliedPromo}</code>
+                  {appliedDiscounts.some((d) => d.ruleType === "promo_code") ? (
+                    <span className="text-xs text-success font-medium">Applied!</span>
+                  ) : (
+                    <span className="text-xs text-destructive font-medium">Invalid</span>
+                  )}
+                </div>
+                <button onClick={handleRemovePromo} className="text-muted-foreground hover:text-foreground">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Enter code"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                  className="font-mono"
+                  onKeyDown={(e) => e.key === "Enter" && handleApplyPromo()}
+                />
+                <Button variant="outline" onClick={handleApplyPromo} disabled={!promoCode.trim()}>
+                  Apply
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Price Breakdown */}
+          <div className="pt-4 border-t border-border space-y-2">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground">Subtotal</span>
+              <span className="text-foreground">AED {subtotal.toFixed(0)}</span>
+            </div>
+
+            {/* Applied discounts */}
+            {appliedDiscounts.map((d) => (
+              <div key={d.ruleId} className="flex justify-between items-center text-sm">
+                <span className="flex items-center gap-1.5 text-success">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  {d.ruleName}
+                  <span className="text-xs text-muted-foreground">
+                    ({d.discountType === "percentage" ? `${d.discountValue}%` : `AED ${d.discountValue}`})
+                  </span>
+                </span>
+                <span className="text-success font-medium">-AED {d.savedAmount.toFixed(0)}</span>
+              </div>
+            ))}
+
+            {totalDiscount > 0 && (
+              <div className="flex justify-between items-center text-sm pt-1 border-t border-dashed border-border">
+                <span className="text-success font-medium">You save</span>
+                <span className="text-success font-bold">AED {totalDiscount.toFixed(0)}</span>
+              </div>
+            )}
+
+            <div className="flex justify-between items-center pt-2">
+              <span className="text-foreground font-medium">Total</span>
               <span className="text-2xl font-bold text-foreground">
-                AED {totalPrice.toFixed(0)}
+                AED {finalPrice.toFixed(0)}
               </span>
             </div>
+
             <Button 
               onClick={handleBookNow}
               disabled={!date}
@@ -287,10 +371,13 @@ export function BookingForm({ tourId, pricingOptions, basePrice, originalPrice }
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="bg-muted/50 p-3 rounded-lg text-sm">
+              <div className="bg-muted/50 p-3 rounded-lg text-sm space-y-1">
                 <p><strong>Date:</strong> {date ? format(date, "PPP") : "-"}</p>
                 <p><strong>Guests:</strong> {adults} Adults{children > 0 ? `, ${children} Children` : ""}</p>
-                <p><strong>Total:</strong> AED {totalPrice.toFixed(0)}</p>
+                {totalDiscount > 0 && (
+                  <p className="text-success"><strong>Discount:</strong> -AED {totalDiscount.toFixed(0)}</p>
+                )}
+                <p><strong>Total:</strong> AED {finalPrice.toFixed(0)}</p>
               </div>
 
               <div className="space-y-3">
