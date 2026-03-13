@@ -224,6 +224,86 @@ export type Database = {
         }
         Relationships: []
       }
+      pricing_rules: {
+        Row: {
+          created_at: string
+          days_before_max: number | null
+          days_before_min: number | null
+          description: string | null
+          discount_type: string
+          discount_value: number
+          end_date: string | null
+          hours_before: number | null
+          id: string
+          is_active: boolean
+          max_group_size: number | null
+          min_group_size: number | null
+          name: string
+          priority: number
+          promo_code: string | null
+          rule_type: string
+          start_date: string | null
+          tour_id: string | null
+          updated_at: string
+          usage_count: number
+          usage_limit: number | null
+        }
+        Insert: {
+          created_at?: string
+          days_before_max?: number | null
+          days_before_min?: number | null
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          end_date?: string | null
+          hours_before?: number | null
+          id?: string
+          is_active?: boolean
+          max_group_size?: number | null
+          min_group_size?: number | null
+          name: string
+          priority?: number
+          promo_code?: string | null
+          rule_type?: string
+          start_date?: string | null
+          tour_id?: string | null
+          updated_at?: string
+          usage_count?: number
+          usage_limit?: number | null
+        }
+        Update: {
+          created_at?: string
+          days_before_max?: number | null
+          days_before_min?: number | null
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          end_date?: string | null
+          hours_before?: number | null
+          id?: string
+          is_active?: boolean
+          max_group_size?: number | null
+          min_group_size?: number | null
+          name?: string
+          priority?: number
+          promo_code?: string | null
+          rule_type?: string
+          start_date?: string | null
+          tour_id?: string | null
+          updated_at?: string
+          usage_count?: number
+          usage_limit?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pricing_rules_tour_id_fkey"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "tours"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rent_cars: {
         Row: {
           created_at: string
