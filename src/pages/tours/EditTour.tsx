@@ -12,6 +12,7 @@ import { RelatedToursSection } from "@/components/admin/tour/RelatedToursSection
 import { ChildAgeSection } from "@/components/admin/tour/ChildAgeSection";
 import { SEOSection } from "@/components/admin/tour/SEOSection";
 import { RightPanelWidgets } from "@/components/admin/tour/RightPanelWidgets";
+import { PricingRulesSection } from "@/components/admin/tour/PricingRulesSection";
 import { SectionNavigation } from "@/components/admin/tour/SectionNavigation";
 import { Eye, Copy, Loader2 } from "lucide-react";
 import { useTourById, useTourPricingOptions, useSaveTour } from "@/hooks/useEditTour";
